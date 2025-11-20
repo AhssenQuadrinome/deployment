@@ -1,0 +1,3 @@
+to avoid cloudshell limitations ill keep useful commands here , mainly basic bash commands to move the aws provider from persistent storage to temp storage to free the 1gb for terraform commands . 
+
+as well as general commands to see storage ...
