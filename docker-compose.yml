@@ -1,0 +1,174 @@
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      default:
+        aliases:
+          - db-unit
+          - db-uaa
+          - db-route
+          - db-ticket
+          - db-payment
+          - db-notification
+          - db-subscription
+          - db-incident
+          - db-gateway
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbit
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  consul:
+    image: hashicorp/consul
+    container_name: consul
+    command: agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    healthcheck:
+      test: ["CMD", "consul", "info"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+  # Application Services
+  uaa:
+    image: abderrahmane03/ourbusway:Uaa-latest
+    container_name: uaa-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      consul:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  route:
+    image: abderrahmane03/ourbusway:Route-latest
+    container_name: route-service
+    ports:
+      - "8084:8084"
+    depends_on:
+      uaa:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  ticket:
+    image: abderrahmane03/ourbusway:Ticket-latest
+    container_name: ticket-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      route:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  payment:
+    image: abderrahmane03/ourbusway:Payment-latest
+    container_name: payment-service
+    ports:
+      - "8087:8087"
+    depends_on:
+      ticket:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+
+  notification:
+    image: abderrahmane03/ourbusway:Notification-latest
+    container_name: notification-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      gateway:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+      SENDGRID_SENDER_EMAIL: ${SENDGRID_SENDER_EMAIL}
+      SENDGRID_SENDER_NAME: ${SENDGRID_SENDER_NAME}
+
+  subscription:
+    image: abderrahmane03/ourbusway:Subscription-latest
+    container_name: subscription-service
+    ports:
+      - "8086:8086"
+    depends_on:
+      payment:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  incident:
+    image: abderrahmane03/ourbusway:Incident-latest
+    container_name: incident-service
+    ports:
+      - "8088:8088"
+    depends_on:
+      subscription:
+        condition: service_started
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  gateway:
+    image: abderrahmane03/ourbusway:Gateway-latest
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      uaa:
+        condition: service_started
+      consul:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+  frontend:
+    image: abderrahmane03/ourbusway:FrontEnd-latest
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      gateway:
+        condition: service_started
+    command: ["npm", "run", "dev", "--", "--host=0.0.0.0"]
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: ourbusway-network
