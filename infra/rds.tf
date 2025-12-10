@@ -1,7 +1,7 @@
 #aws requires subnet groups even if rds is only in one 
 resource "aws_db_subnet_group" "app" {
   name       = "${local.name_prefix}-db-subnet"
-  subnet_ids = [aws_subnet.private.id]  # single subnet for now 
+  subnet_ids = [aws_subnet.private.id, aws_subnet.private_b.id]
   tags       = merge(local.common_tags, { Name = "${local.name_prefix}-db-subnet" })
 }
 
