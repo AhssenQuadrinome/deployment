@@ -1,0 +1,1 @@
+# will be handeled with k8s mostly 
