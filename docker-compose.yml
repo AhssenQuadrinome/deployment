@@ -164,7 +164,7 @@ services:
     depends_on:
       gateway:
         condition: service_started
-    environemnt:
+    environment:
       VITE_STRIPE_PUBLISHABLE_KEY: ${VITE_STRIPE_PUBLISHABLE_KEY}
     command: ["npm", "run", "dev", "--", "--host=0.0.0.0"]
 

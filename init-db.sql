@@ -1,0 +1,9 @@
+CREATE DATABASE "db-uaa";
+CREATE DATABASE "db-gateway";
+CREATE DATABASE "db-ticket";
+CREATE DATABASE "db-notification";
+CREATE DATABASE "db-incident";
+CREATE DATABASE "db-payment";
+CREATE DATABASE "db-subscription";
+CREATE DATABASE "db-route";
+CREATE DATABASE "db-unit";
