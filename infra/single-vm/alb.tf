@@ -72,7 +72,7 @@ resource "aws_lb_listener" "http" {
 
   default_action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.frontend.arn
+    target_group_arn = aws_lb_target_group.app.arn
   }
   
   tags = merge(local.common_tags, {
