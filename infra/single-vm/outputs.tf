@@ -37,3 +37,9 @@ output "alb_dns_name" {
   description = "Public DNS name of the Application Load Balancer"
   value       = aws_lb.app.dns_name
 }
+
+# Keep backward compatibility
+output "alb_target_group_arn" {
+  description = "Frontend target group ARN"
+  value       = aws_lb_target_group.frontend.arn
+}
