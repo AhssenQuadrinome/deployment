@@ -15,21 +15,21 @@ resource "aws_lb" "app" {
   enable_deletion_protection = false
   idle_timeout               = 60
 
+
   tags = merge(local.common_tags, {
     Name = "${local.name_prefix}-alb"
   })
 }
 
-# Target Group for Frontend (port 5173)
+# Target Group for App instances
 resource "aws_lb_target_group" "app" {
-  name        = "${local.name_prefix}-frontend-tg"
+  name        = "${local.name_prefix}-tg"
   port        = 5173
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = aws_vpc.main.id
-  
   health_check {
-    path                = "/"
+    path                = "/health"
     matcher             = "200"
     interval            = 30
     timeout             = 5
@@ -38,7 +38,7 @@ resource "aws_lb_target_group" "app" {
   }
 
   tags = merge(local.common_tags, { 
-    Name = "${local.name_prefix}-frontend-tg" 
+    Name = "${local.name_prefix}-tg" 
   })
 }
 
@@ -64,7 +64,8 @@ resource "aws_lb_target_group" "gateway" {
   })
 }
 
-# HTTP Listener - Default forwards to frontend
+
+# HTTP Listener
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.app.arn
   port              = 80
@@ -74,13 +75,12 @@ resource "aws_lb_listener" "http" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.app.arn
   }
-  
   tags = merge(local.common_tags, {
     Name = "${local.name_prefix}-http-listener" 
   })
 }
 
-# Listener Rule - Route API traffic to gateway
+# Listener Rule - Route API paths to gateway
 resource "aws_lb_listener_rule" "api_routes" {
   listener_arn = aws_lb_listener.http.arn
   priority     = 100
@@ -105,11 +105,10 @@ resource "aws_lb_listener_rule" "api_routes" {
   }
 }
 
-# Target Group Attachments
 resource "aws_lb_target_group_attachment" "app" {
   target_group_arn = aws_lb_target_group.app.arn
   target_id        = aws_instance.app.id
-  port             = 5173
+  port             = 5173  
 }
 
 resource "aws_lb_target_group_attachment" "gateway" {
