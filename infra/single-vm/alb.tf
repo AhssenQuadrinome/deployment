@@ -92,15 +92,7 @@ resource "aws_lb_listener_rule" "api_routes" {
 
   condition {
     path_pattern {
-      values = [
-        "/authMgtApi/*",
-        "/ticketMgtApi/*",
-        "/routeMgtApi/*",
-        "/paymentMgtApi/*",
-        "/notificationMgtApi/*",
-        "/incidentMgtApi/*",
-        "/subscriptionMgtApi/*"
-      ]
+      values = ["/*MgtApi/*"]
     }
   }
 }
