@@ -36,6 +36,15 @@ resource "aws_security_group" "ec2" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Frontend traffic from ALB (NEW - port 5173)
+  ingress {
+    description     = "Frontend traffic from ALB"
+    from_port       = 5173
+    to_port         = 5173
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
   # Application traffic from ALB only
   ingress {
     description     = "App traffic from ALB"
