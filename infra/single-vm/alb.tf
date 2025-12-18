@@ -24,7 +24,7 @@ resource "aws_lb" "app" {
 # Target Group for App instances
 resource "aws_lb_target_group" "app" {
   name        = "${local.name_prefix}-tg"
-  port        = 8080
+  port        = 5173
   protocol    = "HTTP"
   target_type = "instance"
   vpc_id      = aws_vpc.main.id
@@ -60,5 +60,5 @@ resource "aws_lb_listener" "http" {
 resource "aws_lb_target_group_attachment" "app" {
   target_group_arn = aws_lb_target_group.app.arn
   target_id        = aws_instance.app.id
-  port             = 8080
+  port             = 5173  
 }
