@@ -21,7 +21,7 @@ resource "aws_lb" "app" {
 }
 
 # Target Group for Frontend (port 5173)
-resource "aws_lb_target_group" "frontend" {
+resource "aws_lb_target_group" "app" {
   name        = "${local.name_prefix}-frontend-tg"
   port        = 5173
   protocol    = "HTTP"
@@ -106,7 +106,7 @@ resource "aws_lb_listener_rule" "api_routes" {
 }
 
 # Target Group Attachments
-resource "aws_lb_target_group_attachment" "frontend" {
+resource "aws_lb_target_group_attachment" "app" {
   target_group_arn = aws_lb_target_group.frontend.arn
   target_id        = aws_instance.app.id
   port             = 5173
