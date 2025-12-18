@@ -7,6 +7,11 @@ variable "availability_zone" {
   default     = "us-east-1a"
 }
 
+variable "availability_zone_2" {
+  description = "Second availability zone for ALB"
+  default     = "us-east-1b"
+}
+
 variable "instance_type" {
   description = "EC2 instance type for the application VM"
   default     = "t3.medium"
@@ -39,6 +44,7 @@ locals {
 }
 
 locals {
-  vpc_cidr           = "10.0.0.0/16"
-  public_subnet_cidr = "10.0.1.0/24"
+  vpc_cidr            = "10.0.0.0/16"
+  public_subnet_cidr  = "10.0.1.0/24"
+  public_subnet_cidr_2 = "10.0.2.0/24"
 }

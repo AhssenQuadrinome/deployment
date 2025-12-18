@@ -8,7 +8,8 @@ resource "aws_lb" "app" {
   internal           = false
   security_groups    = [aws_security_group.alb.id]
   subnets = [
-    aws_subnet.public.id
+    aws_subnet.public.id,
+    aws_subnet.public_b.id
   ]
 
   enable_deletion_protection = false
